@@ -140,6 +140,14 @@ public class UserServiceImpl implements UserService{
 			bean.setToken("token-admin");
 			return bean;
 		}
+		else if("tokenlinshi".equals(token)){
+			bean.setId("-1");
+			bean.setNickname("临时");
+			bean.setUsername("linshi");
+			bean.setTelephone("1510557673@qq.com");
+			bean.setToken("token-linshi");
+			return bean;
+		}
 		return null;
 	}
 

@@ -145,11 +145,29 @@ netdisk-client-javasdk/src/main/java/com.micro.netdisk.javasdk.service.FileServi
 * 网盘系统`在线演示`：[http://106.15.248.223/disk](http://106.15.248.223/disk)
 * 网盘后台`在线演示`：[http://106.15.248.223/disk-manage](http://106.15.248.223/disk-manage)
 
+![img.png](img.png)
+## 修改代码
+### fastdfs分组设置groupname要截取，传groupnamePath不传
+~~~
+ 	@Override
+	public byte[] download(String path) {
 
-
-# 微信公众号开通了，坚持手写有技术含量的原创文章
-【作者写专栏和做项目也不容易，如果觉得对您有帮助可以帮忙订阅一下专栏，当做请作者喝杯咖啡，非常感谢 】
-
-感谢各位老铁订阅了慕课网上面的专栏，由于慕课网的专栏留言是需要官方审核通过之后我才能看到，因此可能会延时，但是我收到留言基本上都会第一时间给大家回复。通过留言，我发现好多小伙伴还是有疑问的，为了方便帮助各位老铁解答相关疑问，`zwyjavaee`这是我的微信号，专栏内容、网盘系统、技术上有疑问的，都可以互相沟通，本人也是本着交朋友的态度去跟大家交流，所以希望文明交流！【加的时候，备注`慕课网`或者`码云`吧】
-
-![输入图片说明](https://images.gitee.com/uploads/images/2020/0407/231510_6b308b9b_798389.jpeg "二维码.jpg")
+		String substring = path.split("/")[0];
+		String path2 = path.substring( path.indexOf("/")+1,path.length());
+		//todo 这里必须填上分组
+		byte[] bytes=storageClient.downloadFile("group1",path2);
+		return bytes;
+	}
+~~~
+## 添加了一个临时token用于分享
+~~~
+	else if("tokenlinshi".equals(token)){
+			bean.setId("-1");
+			bean.setNickname("临时");
+			bean.setUsername("linshi");
+			bean.setTelephone("1510557673@qq.com");
+			bean.setToken("token-linshi");
+			return bean;
+		}
+~~~
+## 控制容量大小是

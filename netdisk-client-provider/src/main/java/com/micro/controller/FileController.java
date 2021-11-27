@@ -109,7 +109,7 @@ public class FileController {
 			ValidateUtils.validate(businessId, "businessid");
 			ValidateUtils.validate(businessType, "businesstype");
 			ValidateUtils.validate(userId, "userid");
-			ValidateUtils.validate(userName, "username");
+			ValidateUtils.validate(userName, "z");
 			
 			String fileid=appFileService.mergeChunk(appId, filemd5, filename, filesize, 
 					businessId, businessType, userId, userName,secondUpload, allowMultiple);

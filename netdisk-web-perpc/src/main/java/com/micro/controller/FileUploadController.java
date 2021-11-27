@@ -71,7 +71,45 @@ public class FileUploadController {
 			throw new RuntimeException(e.getMessage());
 		}
 	}
+	@ApiOperation(value="切块上传临时上传",notes="切块上传")
+	@ApiImplicitParams({
+			@ApiImplicitParam(name = "file", value = "切块",dataType = "file",paramType="form",required=true),
+			@ApiImplicitParam(name = "token", value = "token",dataType = "String",paramType="query",required=true)
+	})
+	@PostMapping("/uploadChunk2")
+	public Result uploadChunk2(MultipartFile file, ChunkPojo chunkPojo, String token, HttpServletRequest request,
+							  HttpServletResponse response) {
+		try {
+			//1.通过token获取用户信息
+//			SessionUserBean user = userService.getUserByToken(token);
+//			if (user == null) {
+//				throw new RuntimeException("token无效");
+//			}else{
+				request.setAttribute("userid", "-1");
+				request.setAttribute("username","linshi");
+//			}
+			//2.判断切块是否为空
+			if (file == null) {
+				throw new RuntimeException("切块不能为空");
+			}
 
+			//3.参数设置
+			Chunk chunk=new Chunk();
+			BeanUtils.copyProperties(chunkPojo, chunk);
+			chunk.setUserid("-1");
+			chunk.setUsername("linshi");
+			chunk.setBytes(file.getBytes());
+
+			//4.调用切块上传接口
+			fileService.uploadChunk(chunk);
+
+			return ResultUtils.success("上传切块成功", null);
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.setStatus(500);
+			throw new RuntimeException(e.getMessage());
+		}
+	}
 	@ApiOperation(value="检查文件是否存在",notes="检查文件是否存在")
 	@ApiImplicitParams({
         @ApiImplicitParam(name = "filemd5", value = "文件MD5",dataType = "String",paramType="query",required=true),

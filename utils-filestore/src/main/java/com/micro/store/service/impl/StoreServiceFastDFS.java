@@ -1,5 +1,6 @@
 package com.micro.store.service.impl;
 
+import com.alibaba.nacos.api.config.annotation.NacosValue;
 import org.apache.commons.io.FilenameUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,7 +13,9 @@ import com.micro.store.service.StoreService;
 public class StoreServiceFastDFS implements StoreService{
 	@Autowired
 	private FastFileStorageClient storageClient;
-
+	//分组
+	@NacosValue(value="${uploadGroup}",autoRefreshed=true)
+	private String uploadGroup;
 	@Override
 	public String upload(String group, byte[] bytes, String fileName) {
 		String fileExtName = FilenameUtils.getExtension(fileName);
@@ -28,7 +31,11 @@ public class StoreServiceFastDFS implements StoreService{
 	
 	@Override
 	public byte[] download(String path) {
-		byte[] bytes=storageClient.downloadFile("",path);
+
+		String substring = path.split("/")[0];
+		String path2 = path.substring( path.indexOf("/")+1,path.length());
+		//todo 这里必须填上分组
+		byte[] bytes=storageClient.downloadFile("group1",path2);
 		return bytes;
 	}
 
