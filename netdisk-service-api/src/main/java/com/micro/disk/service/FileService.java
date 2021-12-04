@@ -3,15 +3,10 @@ package com.micro.disk.service;
 import java.util.List;
 import java.util.Map;
 
-import com.micro.disk.bean.Chunk;
-import com.micro.disk.bean.FileBean;
-import com.micro.disk.bean.FileListBean;
-import com.micro.disk.bean.FolderProp;
-import com.micro.disk.bean.FolderTree;
-import com.micro.disk.bean.MergeFileBean;
-import com.micro.disk.bean.PageInfo;
 
-public interface FileService {
+import com.micro.disk.bean.*;
+
+public interface FileService<T> {
 	/**
 	 * 分页列表
 	 * @param page
@@ -94,7 +89,12 @@ public interface FileService {
 	 * @param bean
 	 */
 	public void mergeChunk(MergeFileBean bean);
-	
+	/**
+	 * 合并切块
+	 * @param bean
+	 */
+	public T mergeChunk2(MergeFileBean bean);
+
 	/**
 	 * 创建文件夹
 	 * @param pid
@@ -124,7 +124,7 @@ public interface FileService {
 	 * 查询文件夹树【懒加载】
 	 * @param userid
 	 * @param pid 父节点id
-	 * @param id  这里主要是控制不展示被复制文件夹
+	 * @param ids  这里主要是控制不展示被复制文件夹
 	 * @return
 	 */
 	@Deprecated

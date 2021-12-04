@@ -126,7 +126,7 @@ import com.micro.utils.SpringContentUtils;
 @Service(interfaceClass=FileService.class,timeout=120000)//毫秒1s=1000毫秒，1分钟=60s=60*1000毫秒
 @Component
 @Transactional
-public class FileServiceImpl implements FileService{
+public class FileServiceImpl implements FileService<MergeRequest>{
 	@Autowired
 	private DiskFileDao diskFileDao;
 	@Autowired
@@ -210,7 +210,8 @@ public class FileServiceImpl implements FileService{
 		});
 		bootstrap.execute();
 	}
-	
+	//临时分享
+
 	@Override
 	public Integer checkFile(String filemd5) {
 		String lockname=filemd5;
@@ -319,8 +320,83 @@ public class FileServiceImpl implements FileService{
 			}
 		}
 	}
-	
-	
+
+
+	@Override
+	public MergeRequest mergeChunk2(MergeFileBean bean) {
+		String lockname=bean.getFilemd5();
+		LockContext lockContext=new LockContext(locktype,lockhost);
+		try{
+			if(!StringUtils.isEmpty(bean.getRelativepath())){
+				String[] names=bean.getRelativepath().split("/");
+				String userid=bean.getUserid();
+				String folderid=bean.getPid();
+
+				lockname="CREATEFOLDER-"+userid+"-"+folderid+"-"+names[0];
+			}
+
+			//获取锁锁
+			lockContext.getLock(lockname);
+
+			MergeRequest request=new MergeRequest();
+			BeanUtils.copyProperties(bean, request);
+
+			Bootstrap bootstrap=new Bootstrap();
+			bootstrap.childHandler(new HandlerInitializer(request,null) {
+				@Override
+				protected void initChannel(Pipeline pipeline) {
+					//1.基本参数的校验
+					pipeline.addLast(springContentUtils.getHandler(MergeValidateHander.class));
+					//2.检验容量是否足够
+					pipeline.addLast(springContentUtils.getHandler(MergeCapacityIsEnoughHandler.class));
+					//3.从Redis获取切块记录
+					pipeline.addLast(springContentUtils.getHandler(MergeGetChunkHandler.class));
+					//4.校验文件是否完整
+					pipeline.addLast(springContentUtils.getHandler(MergeFileIsBreakHandler.class));
+					//5.查询文件是否已经在md5存在了
+					pipeline.addLast(springContentUtils.getHandler(MergeFileIsExistHandler.class));
+					//6.保存disk_md5表
+					pipeline.addLast(springContentUtils.getHandler(MergeSaveDiskMd5Handler.class));
+					//7.保存disk_chunk表
+					pipeline.addLast(springContentUtils.getHandler(MergeSaveDiskMd5ChunkHandler.class));
+					//8.如果是文件夹上传，则先创建文件夹
+					pipeline.addLast(springContentUtils.getHandler(MergeCreateFolderHandler.class));
+					//9.保存disk_file表
+					pipeline.addLast(springContentUtils.getHandler(MergeSaveDiskFileHandler.class));
+					//10.如果是图片则裁剪；如果是视频则截图
+					pipeline.addLast(springContentUtils.getHandler(MergeSpecialDealHandler.class));
+					//11.如果是相册上传图片，则关联相册
+					pipeline.addLast(springContentUtils.getHandler(MergeGlThumnailHandler.class));
+					//12.更新容量、推送容量
+					pipeline.addLast(springContentUtils.getHandler(MergeCapacityUpdateHandler.class));
+					//13.新增Solr
+//					pipeline.addLast(springContentUtils.getHandler(MergeSolrHandler.class));
+//					14.删除Redis记录
+					pipeline.addLast(springContentUtils.getHandler(MergeDelRedisHandler.class));
+				}
+
+
+			});
+			bootstrap.execute();
+			MergeRequest beanret=(MergeRequest) request;
+			return  beanret;
+		}catch(Exception e){
+			throw new RuntimeException(e.getMessage());
+		}finally{
+			try{
+				String key=Contanst.PREFIX_CHUNK_TEMP+"-"+bean.getUserid()+"-"+bean.getUuid()+"-"+bean.getFileid()+"-"+bean.getFilename()+"-*";
+				Set<String> keys = stringRedisTemplate.keys(key);
+				stringRedisTemplate.delete(keys);
+
+			}catch(Exception e){
+
+			}finally{
+				lockContext.unLock(lockname);
+			}
+		}
+	}
+
+
 	@Override
 	public void addFolder(String pid, String filename, String userid, String username) {
 		FolderRequest request=new FolderRequest();

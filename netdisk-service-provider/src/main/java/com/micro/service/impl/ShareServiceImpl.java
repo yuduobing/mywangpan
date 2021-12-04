@@ -84,6 +84,7 @@ public class ShareServiceImpl implements ShareService{
 				pipeline.addLast(springContentUtils.getHandler(ShareSecretValidateHandler.class));
 				//2.保存disk_share
 				pipeline.addLast(springContentUtils.getHandler(ShareSecretSaveHandler.class));
+				//批量遍历保存
 				//3.保存disk_share_file（相册分享）
 				pipeline.addLast(springContentUtils.getHandler(ShareSecretDetailFromAlbumHandler.class));
 				//4.保存disk_share_file（文件分享）

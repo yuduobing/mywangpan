@@ -2,13 +2,14 @@ package com.micro;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
 
 import com.alibaba.dubbo.spring.boot.annotation.EnableDubboConfiguration;
 import com.alibaba.nacos.spring.context.annotation.config.NacosPropertySource;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 @EnableDubboConfiguration
 @NacosPropertySource(dataId = "netdisk-web-perpc",groupId="netdisk",autoRefreshed=true)
 public class PerpcApp {

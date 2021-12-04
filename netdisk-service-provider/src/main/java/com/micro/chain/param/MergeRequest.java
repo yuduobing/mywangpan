@@ -1,5 +1,6 @@
 package com.micro.chain.param;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,7 +11,7 @@ import com.micro.model.DiskFile;
 import lombok.Data;
 
 @Data
-public class MergeRequest extends ContextRequest{
+public class MergeRequest extends ContextRequest implements Serializable {
 	private String userid; //用户id
 	private String username;
 	private String pid; //文件pid（上传到哪个文件夹下）

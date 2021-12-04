@@ -170,4 +170,50 @@ netdisk-client-javasdk/src/main/java/com.micro.netdisk.javasdk.service.FileServi
 			return bean;
 		}
 ~~~
-## 控制容量大小是
+## 控制容量大小是拦截器
+MergeCapacityIsEnoughHandler
+~~~
+	@Override
+	public UserCapacityBean findUserCapacity(String userid) {
+		DiskUserCapacity capacity=diskUserCapacityDao.findByUserid(userid);
+		//方法一：自动初始化100g？？？
+		//方法二：提示容量不足
+		UserCapacityBean ucb=new UserCapacityBean();
+		if(capacity==null){			
+			ucb.setUserid(userid);
+			ucb.setTotalcapacity(0l);
+			ucb.setUsedcapacity(0l);
+			ucb.setUsedcapacityname("0B");
+			ucb.setTotalcapacityname("0B");
+		}else{
+			ucb.setUserid(userid);
+			ucb.setTotalcapacity(capacity.getTotalcapacity());
+			ucb.setUsedcapacity(capacity.getUsedcapacity());
+			ucb.setUsedcapacityname(CapacityUtils.convert(ucb.getUsedcapacity()));
+			ucb.setTotalcapacityname(CapacityUtils.convert(ucb.getTotalcapacity()));
+		}
+		return ucb;
+~~~
+##  string转json shareSecret端口
+
+~~~idjson
+//json转换
+List<String> ids=new ArrayList<String>();
+if(!StringUtils.isEmpty(idjson)){				
+JsonUtils jsonUtils=new JsonJackUtils();
+List<Map> lists=jsonUtils.jsonToList(idjson, Map.class);
+lists.forEach(m->{
+ids.add(m.get("id")==null?"":m.get("id").toString());
+});
+}
+~~~
+## bootstrap.yml（bootstrap.properties）与application.yml（application.properties）执行顺序
+
+bootstrap.yml（bootstrap.properties）用来在程序引导时执行，应用于更加早期配置信息读取，如可以使用来配置application.yml中使用到参数等
+
+application.yml（application.properties) 应用程序特有配置信息，可以用来配置后续各个模块中需使用的公共参数等。
+
+bootstrap.yml 先于 application.yml 加载****
+
+## 	BeanUtils.copyProperties(chunkPojo, chunk)
+拷贝方式2  json序列化 JSON.parseObject(JSON.toJSONString(o), MergeRequest2.class);
